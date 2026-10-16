@@ -1,3 +1,6 @@
+const std = @import("std");
+const Vec3 = @import("vec3.zig").Vec3;
+
 const rl = @import("raylib");
 const Framebuffer = @import("framebuffer.zig").Framebuffer;
 
@@ -5,6 +8,13 @@ const WIDTH: i32 = 800;
 const HEIGHT: i32 = 500;
 
 pub fn main() !void {
+    const a = Vec3.init(1, 0, 0);
+    const b = Vec3.init(0, 1, 0);
+    const c = a.cross(b);
+    std.debug.print("cross = ({d}, {d}, {d})  dot = {d}\n", .{ c.x, c.y, c.z, a.dot(b) });
+
+    rl.setTraceLogLevel(.warning);
+
     rl.initWindow(WIDTH, HEIGHT, "Lab 3: Triangulo baricentrico");
     defer rl.closeWindow();
     rl.setTargetFPS(60);
