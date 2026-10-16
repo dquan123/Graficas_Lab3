@@ -4,6 +4,8 @@ const Vec3 = @import("vec3.zig").Vec3;
 const rl = @import("raylib");
 const Framebuffer = @import("framebuffer.zig").Framebuffer;
 
+const bary = @import("vec3.zig").barycentric;
+
 const WIDTH: i32 = 800;
 const HEIGHT: i32 = 500;
 
@@ -12,6 +14,19 @@ pub fn main() !void {
     const b = Vec3.init(0, 1, 0);
     const c = a.cross(b);
     std.debug.print("cross = ({d}, {d}, {d})  dot = {d}\n", .{ c.x, c.y, c.z, a.dot(b) });
+
+    const t0 = Vec3.init(0, 0, 0);
+    const t1 = Vec3.init(4, 0, 0);
+    const t2 = Vec3.init(0, 4, 0);
+
+    const centro = bary(t0, t1, t2, Vec3.init(4.0 / 3.0, 4.0 / 3.0, 0)).?;
+    std.debug.print("centro = ({d:.3}, {d:.3}, {d:.3})\n", .{ centro.w0, centro.w1, centro.w2 });
+
+    const en_v1 = bary(t0, t1, t2, t1).?;
+    std.debug.print("en v1  = ({d:.3}, {d:.3}, {d:.3})\n", .{ en_v1.w0, en_v1.w1, en_v1.w2 });
+
+    const fuera = bary(t0, t1, t2, Vec3.init(5, 5, 0)).?;
+    std.debug.print("fuera  = ({d:.3}, {d:.3}, {d:.3})\n", .{ fuera.w0, fuera.w1, fuera.w2 });
 
     rl.setTraceLogLevel(.warning);
 
