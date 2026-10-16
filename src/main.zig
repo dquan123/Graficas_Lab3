@@ -62,6 +62,28 @@ fn draw_triangle(
     }
 }
 
+const rojo = rl.Color{ .r = 255, .g = 0, .b = 0, .a = 255 };
+const verde = rl.Color{ .r = 0, .g = 255, .b = 0, .a = 255 };
+const azul = rl.Color{ .r = 0, .g = 0, .b = 255, .a = 255 };
+
+const Triangulo = struct { v0: Vec3, v1: Vec3, v2: Vec3 };
+
+const triangulos = [_]Triangulo{
+    // 1: casi equilátero
+    .{ .v0 = Vec3.init(220, 400, 0), .v1 = Vec3.init(400, 88, 0), .v2 = Vec3.init(580, 400, 0) },
+    // 2: irregular
+    .{ .v0 = Vec3.init(120, 430, 0), .v1 = Vec3.init(330, 60, 0), .v2 = Vec3.init(700, 340, 0) },
+    // 3: delgado
+    .{ .v0 = Vec3.init(300, 440, 0), .v1 = Vec3.init(520, 60, 0), .v2 = Vec3.init(350, 440, 0) },
+};
+
+const nombres = [_][]const u8{ "triangulo1.png", "triangulo2.png", "triangulo3.png" };
+
+fn render_caso(fb: *Framebuffer, t: Triangulo) !void {
+    fb.clear();
+    try draw_triangle(fb, t.v0, t.v1, t.v2, rojo, verde, azul);
+}
+
 pub fn main() !void {
     rl.setTraceLogLevel(.warning);
     rl.initWindow(WIDTH, HEIGHT, "Lab 3: Triangulo baricentrico");
@@ -71,24 +93,21 @@ pub fn main() !void {
     var fb = Framebuffer.init(WIDTH, HEIGHT, .black, .white);
     defer fb.deinit();
 
-    const rojo = rl.Color{ .r = 255, .g = 0, .b = 0, .a = 255 };
-    const verde = rl.Color{ .r = 0, .g = 255, .b = 0, .a = 255 };
-    const azul = rl.Color{ .r = 0, .g = 0, .b = 255, .a = 255 };
+    // Exporta las 3 imágenes de entrega
+    for (triangulos, 0..) |t, i| {
+        try render_caso(&fb, t);
+        try fb.render_to_file(nombres[i]);
+    }
 
-    // Triángulo 1: casi equilátero
-    try draw_triangle(
-        &fb,
-        Vec3.init(220, 400, 0), // v0: abajo-izquierda -> rojo
-        Vec3.init(400, 88, 0), // v1: arriba -> verde
-        Vec3.init(580, 400, 0), // v2: abajo-derecha -> azul
-        rojo,
-        verde,
-        azul,
-    );
-
-    try fb.render_to_file("triangulo1.png");
+    // Muestra el primero; ESPACIO cambia al siguiente
+    var actual: usize = 0;
+    try render_caso(&fb, triangulos[actual]);
 
     while (!rl.windowShouldClose()) {
+        if (rl.isKeyPressed(.space)) {
+            actual = (actual + 1) % triangulos.len;
+            try render_caso(&fb, triangulos[actual]);
+        }
         try fb.swap_buffers();
     }
 }
